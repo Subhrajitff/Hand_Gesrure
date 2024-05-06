@@ -1,18 +1,28 @@
 import cv2
 import numpy as np
 import math
+from gtts import gTTS
+import os
 
 cap = cv2.VideoCapture(0)
+cap.set(3,640)
+cap.set(4,480)
+def speak(a):
+    tts = gTTS(text=a, lang='en')
+    tts.save("audio.mp3")
+    os.system("audio.mp3")
+
 
 while (1):
 
     try:  # an error comes if it does not find anything in window as it cannot find contour of max area
         # therefore this try error statement
 
-        ret, frame = cap.read()
-        frame = cv2.flip(frame, 1)
+        ret, frame1 = cap.read()
+        frame1= cv2.flip(frame1, 1)
         kernel = np.ones((3, 3), np.uint8)
 
+        frame = cv2.resize(frame1, (640, 480))
         # define region of interest
         roi = frame[100:300, 100:300]
 
@@ -92,33 +102,42 @@ while (1):
 
         # print corresponding gestures which are in their ranges
         font = cv2.FONT_HERSHEY_SIMPLEX
+        sign=""
         if l == 1:
             if areacnt < 2000:
                 cv2.putText(frame, 'Put hand in the box', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
+                
             else:
                 if arearatio < 12:
                     cv2.putText(frame, '0', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
                 elif arearatio < 17.5:
                     cv2.putText(frame, 'Best of luck', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
+                    sign="The Sign Recognised is Best Of Luck"
 
                 else:
                     cv2.putText(frame, '1', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
+                    sign="you have 1 finger up  4 fingers down"
 
         elif l == 2:
             cv2.putText(frame, '2', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
+            sign="you have 2 fingers up  3 fingers down"
 
         elif l == 3:
 
             if arearatio < 27:
                 cv2.putText(frame, '3', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
+                sign="you have 3 fingers up  2 fingers down"
             else:
                 cv2.putText(frame, 'ok', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
+                sign="The Sign Recognized is ok"
 
         elif l == 4:
             cv2.putText(frame, '4', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
+            sign="you have 4 fingers up  1 fingers down"
 
         elif l == 5:
             cv2.putText(frame, '5', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
+            sign="you have 5 fingers up  0 fingers down"
 
         elif l == 6:
             cv2.putText(frame, 'reposition', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
@@ -131,9 +150,12 @@ while (1):
         cv2.imshow('frame', frame)
     except:
         pass
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord("q"):
+        speak(sign) 
 
-    k = cv2.waitKey(5) & 0xFF
-    if k == 27:
+    
+    if key == ord("s"):
         break
 
 cv2.destroyAllWindows()
